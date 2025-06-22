@@ -1,40 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# The Future University - Social Feed Project
+
+A simple social media web application built with Next.js and Supabase. Users can sign up, create posts with text and images, and interact with content from others.
+
+## Features
+
+*   **User Authentication:** Sign up, log in, and manage your account.
+*   **Create & View Posts:** Create text posts with an optional image. View all posts in a global feed.
+*   **"Clap" for Posts:** Show appreciation for posts by "clapping." You can clap multiple times.
+*   **User Profiles:** Customize your name, username, bio, and choose a profile avatar.
+*   **Delete Your Content:** Users can delete their own posts.
+*   **Light & Dark Mode:** Toggle between light and dark themes.
+
+## Tech Stack
+
+*   **Framework:** [Next.js](https://nextjs.org/)
+*   **Backend & DB:** [Supabase](https://supabase.io/)
+*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 
 ## Getting Started
 
-First, run the development server:
+Follow these instructions to get a copy of the project up and running on your local machine.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Prerequisites
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+*   Node.js and npm (or yarn/pnpm)
+*   A free [Supabase](https://supabase.io/) account
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+### 1. Set Up Supabase
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+*   Go to the [Supabase Dashboard](https://app.supabase.io) and create a new project.
+*   Once your project is created, navigate to **Project Settings** > **API**.
+*   Find your **Project URL** and your **`anon` public key**. You'll need these for the next step.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+### 2. Configure Your Local Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+*   Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/your-repo-name.git
+    cd your-repo-name
+    ```
+*   Install the necessary dependencies:
+    ```bash
+    npm install
+    ```
+*   Create a new file named `.env.local` in the root of your project.
+*   Add your Supabase API credentials to the `.env.local` file:
+    ```
+    NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+    ```
+    Replace `YOUR_SUPABASE_URL` and `YOUR_SUPABASE_ANON_KEY` with the values you copied from your Supabase project settings.
 
-## Learn More
+### 3. Set Up the Database
 
-To learn more about Next.js, take a look at the following resources:
+*   In your Supabase project dashboard, navigate to the **SQL Editor**.
+*   Click **+ New query**.
+*   Open the `supabase_setup/setup.sql` file from this repository, copy its entire content.
+*   Paste the content into the Supabase SQL Editor and click **RUN**. This will create all the necessary tables, functions, and storage policies.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+### 4. Run the Application
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+*   Start the development server:
+    ```bash
+    npm run dev
+    ```
+*   Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+That's it! You should now have a fully functional version of the social feed app running locally.
