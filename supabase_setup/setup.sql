@@ -1,6 +1,8 @@
+-- This script is now IDEMPOTENT, meaning it can be run multiple times without causing errors.
+
 -- 1. PROFILES TABLE
 -- This table stores public user data. Users can read all profiles, but only edit their own.
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID NOT NULL PRIMARY KEY,
   name TEXT,
   username TEXT UNIQUE,
@@ -10,13 +12,16 @@ CREATE TABLE public.profiles (
   CONSTRAINT id_fk FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read profiles" ON public.profiles;
 CREATE POLICY "Public can read profiles" ON public.profiles FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
 CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
 -- 2. POSTS TABLE
 -- This table stores all posts. Users can read all posts, but only create/delete their own.
-CREATE TABLE public.posts (
+CREATE TABLE IF NOT EXISTS public.posts (
   id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
   content TEXT NOT NULL,
@@ -26,13 +31,16 @@ CREATE TABLE public.posts (
   CONSTRAINT user_id_fk FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE
 );
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read posts" ON public.posts;
 CREATE POLICY "Public can read posts" ON public.posts FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can insert their own posts" ON public.posts;
 CREATE POLICY "Users can insert their own posts" ON public.posts FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can delete their own posts" ON public.posts;
 CREATE POLICY "Users can delete their own posts" ON public.posts FOR DELETE USING (auth.uid() = user_id);
 
 -- 3. LIKES (CLAPS) TABLE
 -- This table tracks claps from each user on each post.
-CREATE TABLE public.likes (
+CREATE TABLE IF NOT EXISTS public.likes (
   post_id UUID NOT NULL,
   user_id UUID NOT NULL,
   clap_count INT NOT NULL DEFAULT 1,
@@ -43,24 +51,32 @@ CREATE TABLE public.likes (
   CONSTRAINT user_id_fk_likes FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read clap data" ON public.likes;
 CREATE POLICY "Public can read clap data" ON public.likes FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can manage their own claps" ON public.likes;
 CREATE POLICY "Users can manage their own claps" ON public.likes FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 4. STORAGE BUCKETS
--- Create a bucket for Avatars and one for Post Images.
+-- Create a bucket for Avatars and one for Post Images. (This is already idempotent)
 INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true) ON CONFLICT (id) DO NOTHING;
 INSERT INTO storage.buckets (id, name, public) VALUES ('post_images', 'post_images', true) ON CONFLICT (id) DO NOTHING;
 -- Set up RLS policies for Avatars bucket
+DROP POLICY IF EXISTS "Public read for avatars" ON storage.objects;
 CREATE POLICY "Public read for avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+DROP POLICY IF EXISTS "Authenticated users can upload avatars" ON storage.objects;
 CREATE POLICY "Authenticated users can upload avatars" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'avatars' AND auth.uid() = (storage.foldername(name))[1]::uuid);
+DROP POLICY IF EXISTS "Users can manage their own avatar" ON storage.objects;
 CREATE POLICY "Users can manage their own avatar" ON storage.objects FOR ALL TO authenticated USING (auth.uid() = owner_id::uuid);
 -- Set up RLS policies for Post Images bucket
+DROP POLICY IF EXISTS "Public read for post images" ON storage.objects;
 CREATE POLICY "Public read for post images" ON storage.objects FOR SELECT USING (bucket_id = 'post_images');
+DROP POLICY IF EXISTS "Authenticated users can upload post images" ON storage.objects;
 CREATE POLICY "Authenticated users can upload post images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'post_images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
+DROP POLICY IF EXISTS "Users can manage their own post images" ON storage.objects;
 CREATE POLICY "Users can manage their own post images" ON storage.objects FOR ALL TO authenticated USING (auth.uid() = owner_id::uuid);
 
 
--- 5. DATABASE FUNCTIONS
+-- 5. DATABASE FUNCTIONS (These are already idempotent via CREATE OR REPLACE)
 -- Function to create a profile when a new user signs up.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -95,6 +111,7 @@ $$;
 
 -- 6. TRIGGERS & PERMISSIONS
 -- Trigger to execute `handle_new_user` on user creation
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
