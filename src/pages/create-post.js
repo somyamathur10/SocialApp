@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 import Navbar from '../components/navbar';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function CreatePost() {
   const [content, setContent] = useState('');
@@ -44,9 +45,9 @@ export default function CreatePost() {
     // 1. Upload image if one is selected
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${uuidv4()}.${fileExt}`;
       const { data, error: uploadError } = await supabase.storage
-        .from('post-images')
+        .from('post_images')
         .upload(fileName, imageFile);
 
       if (uploadError) {

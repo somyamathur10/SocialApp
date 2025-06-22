@@ -49,14 +49,14 @@ CREATE POLICY "Users can manage their own claps" ON public.likes FOR ALL USING (
 -- 4. STORAGE BUCKETS
 -- Create a bucket for Avatars and one for Post Images.
 INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true) ON CONFLICT (id) DO NOTHING;
-INSERT INTO storage.buckets (id, name, public) VALUES ('post-images', 'post-images', true) ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public) VALUES ('post_images', 'post_images', true) ON CONFLICT (id) DO NOTHING;
 -- Set up RLS policies for Avatars bucket
 CREATE POLICY "Public read for avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
 CREATE POLICY "Authenticated users can upload avatars" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'avatars' AND auth.uid() = (storage.foldername(name))[1]::uuid);
 CREATE POLICY "Users can manage their own avatar" ON storage.objects FOR ALL TO authenticated USING (auth.uid() = owner_id::uuid);
 -- Set up RLS policies for Post Images bucket
-CREATE POLICY "Public read for post images" ON storage.objects FOR SELECT USING (bucket_id = 'post-images');
-CREATE POLICY "Authenticated users can upload post images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'post-images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
+CREATE POLICY "Public read for post images" ON storage.objects FOR SELECT USING (bucket_id = 'post_images');
+CREATE POLICY "Authenticated users can upload post images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'post_images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
 CREATE POLICY "Users can manage their own post images" ON storage.objects FOR ALL TO authenticated USING (auth.uid() = owner_id::uuid);
 
 

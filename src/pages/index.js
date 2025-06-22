@@ -5,6 +5,7 @@ import Navbar from '../components/navbar';
 import Link from 'next/link';
 import Head from 'next/head';
 import Avatar from '../components/Avatar';
+import { useSession } from 'next-auth/react';
 
 // Helper component to render post images
 function PostImage({ imageUrl }) {
@@ -12,7 +13,7 @@ function PostImage({ imageUrl }) {
 
   useEffect(() => {
     if (imageUrl) {
-      const { data } = supabase.storage.from('post-images').getPublicUrl(imageUrl);
+      const { data } = supabase.storage.from('post_images').getPublicUrl(imageUrl);
       setFullUrl(data.publicUrl);
     }
   }, [imageUrl]);
@@ -30,6 +31,7 @@ export default function Home({ initialPosts, serverError }) {
   const [posts, setPosts] = useState(initialPosts || []);
   const [user, setUser] = useState(null);
   const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (serverError) {
