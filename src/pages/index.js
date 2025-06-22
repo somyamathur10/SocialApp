@@ -88,7 +88,7 @@ export default function Home({ initialPosts, serverError }) {
     const userLike = user ? post.likes.find(like => like.user_id === user.id) : null;
     return {
       ...post,
-      user_like_count: userLike ? userLike.like_count : 0,
+      user_like_count: userLike ? userLike.count : 0,
     };
   });
 
@@ -177,7 +177,7 @@ export async function getServerSideProps() {
     .select(`
       id, content, like_count, created_at, user_id, image_url,
       profiles!left ( name, username, avatar_url ),
-      likes ( user_id, like_count )
+      likes ( user_id, count )
     `)
     .order('created_at', { ascending: false });
 

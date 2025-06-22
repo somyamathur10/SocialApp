@@ -43,7 +43,7 @@ CREATE POLICY "Users can delete their own posts" ON public.posts FOR DELETE USIN
 CREATE TABLE IF NOT EXISTS public.likes (
   post_id UUID NOT NULL,
   user_id UUID NOT NULL,
-  like_count INT NOT NULL DEFAULT 1,
+  count INT NOT NULL DEFAULT 1,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT likes_pkey PRIMARY KEY (post_id, user_id),
@@ -90,10 +90,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE FUNCTION public.add_like(post_id_input uuid)
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
-  INSERT INTO public.likes (post_id, user_id, like_count)
+  INSERT INTO public.likes (post_id, user_id, count)
   VALUES (post_id_input, auth.uid(), 1)
   ON CONFLICT (post_id, user_id)
-  DO UPDATE SET like_count = likes.like_count + 1, updated_at = NOW();
+  DO UPDATE SET count = likes.count + 1, updated_at = NOW();
   UPDATE public.posts SET like_count = like_count + 1 WHERE id = post_id_input;
 END;
 $$;
