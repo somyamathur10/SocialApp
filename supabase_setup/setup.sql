@@ -38,12 +38,12 @@ CREATE POLICY "Users can insert their own posts" ON public.posts FOR INSERT WITH
 DROP POLICY IF EXISTS "Users can delete their own posts" ON public.posts;
 CREATE POLICY "Users can delete their own posts" ON public.posts FOR DELETE USING (auth.uid() = user_id);
 
--- 3. LIKES (CLAPS) TABLE
--- This table tracks claps from each user on each post.
+-- 3. LIKES TABLE
+-- This table tracks likes from each user on each post.
 CREATE TABLE IF NOT EXISTS public.likes (
   post_id UUID NOT NULL,
   user_id UUID NOT NULL,
-  clap_count INT NOT NULL DEFAULT 1,
+  like_count INT NOT NULL DEFAULT 1,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT likes_pkey PRIMARY KEY (post_id, user_id),
@@ -51,10 +51,10 @@ CREATE TABLE IF NOT EXISTS public.likes (
   CONSTRAINT user_id_fk_likes FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Public can read clap data" ON public.likes;
-CREATE POLICY "Public can read clap data" ON public.likes FOR SELECT USING (true);
-DROP POLICY IF EXISTS "Users can manage their own claps" ON public.likes;
-CREATE POLICY "Users can manage their own claps" ON public.likes FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Public can read like data" ON public.likes;
+CREATE POLICY "Public can read like data" ON public.likes FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can manage their own likes" ON public.likes;
+CREATE POLICY "Users can manage their own likes" ON public.likes FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 4. STORAGE BUCKETS
 -- Create a bucket for Avatars and one for Post Images. (This is already idempotent)
@@ -86,14 +86,14 @@ BEGIN
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
--- Function to add a clap to a post
-CREATE OR REPLACE FUNCTION public.add_clap(post_id_input uuid)
+-- Function to add a like to a post
+CREATE OR REPLACE FUNCTION public.add_like(post_id_input uuid)
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
-  INSERT INTO public.likes (post_id, user_id, clap_count)
+  INSERT INTO public.likes (post_id, user_id, like_count)
   VALUES (post_id_input, auth.uid(), 1)
   ON CONFLICT (post_id, user_id)
-  DO UPDATE SET clap_count = likes.clap_count + 1, updated_at = NOW();
+  DO UPDATE SET like_count = likes.like_count + 1, updated_at = NOW();
   UPDATE public.posts SET like_count = like_count + 1 WHERE id = post_id_input;
 END;
 $$;
@@ -116,5 +116,5 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 -- Grant execute permissions on functions
-GRANT EXECUTE ON FUNCTION public.add_clap(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.add_like(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.delete_post(uuid) TO authenticated;

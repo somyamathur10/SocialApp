@@ -39,26 +39,26 @@ export default function Home({ initialPosts, serverError }) {
     }
   }, [serverError]);
 
-  const handleClap = async (postId) => {
+  const handleLike = async (postId) => {
     if (!user) {
-      alert('You must be logged in to clap for a post.');
+      alert('You must be logged in to like a post.');
       router.push('/login-signup');
       return;
     }
 
-    const { error } = await supabase.rpc('add_clap', { post_id_input: postId });
+    const { error } = await supabase.rpc('add_like', { post_id_input: postId });
 
     if (error) {
-      console.error('Error clapping for post:', error);
+      console.error('Error liking post:', error);
       alert('Error: ' + error.message);
     } else {
-      // If successful, update the local state to reflect the new clap
+      // If successful, update the local state to reflect the new like
       setPosts(posts.map(p => {
         if (p.id === postId) {
           return {
             ...p,
             like_count: p.like_count + 1,
-            user_clap_count: (p.user_clap_count || 0) + 1,
+            user_like_count: (p.user_like_count || 0) + 1,
           };
         }
         return p;
@@ -88,7 +88,7 @@ export default function Home({ initialPosts, serverError }) {
     const userLike = user ? post.likes.find(like => like.user_id === user.id) : null;
     return {
       ...post,
-      user_clap_count: userLike ? userLike.clap_count : 0,
+      user_like_count: userLike ? userLike.like_count : 0,
     };
   });
 
@@ -144,19 +144,19 @@ export default function Home({ initialPosts, serverError }) {
                 <PostImage imageUrl={post.image_url} />
                 <div className="mt-4 flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
                   <span className="flex items-center space-x-2">
-                    <span className="text-xl">👏</span>
-                    <span>{post.like_count}</span>
+                    <span className="text-xl">👍</span>
+                    <span className="font-bold">{post.like_count}</span>
                   </span>
                   <div className="relative">
                     <button
-                      onClick={() => handleClap(post.id)}
+                      onClick={() => handleLike(post.id)}
                       className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105 hover:bg-blue-600"
                     >
-                      Clap
+                      Like
                     </button>
-                    {post.user_clap_count > 0 && (
+                    {post.user_like_count > 0 && (
                       <div className="absolute -top-3 -right-3 bg-green-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">
-                        +{post.user_clap_count}
+                        +{post.user_like_count}
                       </div>
                     )}
                   </div>
@@ -177,7 +177,7 @@ export async function getServerSideProps() {
     .select(`
       id, content, like_count, created_at, user_id, image_url,
       profiles!left ( name, username, avatar_url ),
-      likes ( user_id, clap_count )
+      likes ( user_id, like_count )
     `)
     .order('created_at', { ascending: false });
 

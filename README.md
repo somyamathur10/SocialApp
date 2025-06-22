@@ -6,7 +6,7 @@ A simple social media web application built with Next.js and Supabase. Users can
 
 *   **User Authentication:** Sign up, log in, and manage your account.
 *   **Create & View Posts:** Create text posts with an optional image. View all posts in a global feed.
-*   **"Clap" for Posts:** Show appreciation for posts by "clapping." You can clap multiple times.
+*   **"Like" Posts:** Show appreciation for posts by "liking" them. You can like a post multiple times.
 *   **User Profiles:** Customize your name, username, bio, and choose a profile avatar.
 *   **Delete Your Content:** Users can delete their own posts.
 *   **Light & Dark Mode:** Toggle between light and dark themes.
