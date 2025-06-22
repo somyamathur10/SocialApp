@@ -23,6 +23,7 @@ export default function LoginSignup() {
           data: {
             name: name,
           },
+          emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL || 'https://your-app-name.netlify.app',
         },
       });
 
