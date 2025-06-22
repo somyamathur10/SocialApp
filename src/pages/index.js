@@ -39,14 +39,14 @@ export default function Home({ initialPosts, serverError }) {
     }
   }, [serverError]);
 
-  const handleLike = async (postId) => {
+  const handleClap = async (postId) => {
     if (!user) {
       alert('You must be logged in to like a post.');
       router.push('/login-signup');
       return;
     }
 
-    const { error } = await supabase.rpc('add_like', { post_id_input: postId });
+    const { error } = await supabase.rpc('add_clap', { post_id_input: postId });
 
     if (error) {
       console.error('Error liking post:', error);
@@ -58,7 +58,7 @@ export default function Home({ initialPosts, serverError }) {
           return {
             ...p,
             like_count: p.like_count + 1,
-            user_like_count: (p.user_like_count || 0) + 1,
+            user_clap_count: (p.user_clap_count || 0) + 1,
           };
         }
         return p;
@@ -88,7 +88,7 @@ export default function Home({ initialPosts, serverError }) {
     const userLike = user ? post.likes.find(like => like.user_id === user.id) : null;
     return {
       ...post,
-      user_like_count: userLike ? userLike.count : 0,
+      user_clap_count: userLike ? userLike.clap_count : 0,
     };
   });
 
@@ -149,14 +149,14 @@ export default function Home({ initialPosts, serverError }) {
                   </span>
                   <div className="relative">
                     <button
-                      onClick={() => handleLike(post.id)}
+                      onClick={() => handleClap(post.id)}
                       className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105 hover:bg-blue-600"
                     >
                       Like
                     </button>
-                    {post.user_like_count > 0 && (
+                    {post.user_clap_count > 0 && (
                       <div className="absolute -top-3 -right-3 bg-green-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">
-                        +{post.user_like_count}
+                        +{post.user_clap_count}
                       </div>
                     )}
                   </div>
@@ -177,7 +177,7 @@ export async function getServerSideProps() {
     .select(`
       id, content, like_count, created_at, user_id, image_url,
       profiles!left ( name, username, avatar_url ),
-      likes ( user_id, count )
+      likes ( user_id, clap_count )
     `)
     .order('created_at', { ascending: false });
 
