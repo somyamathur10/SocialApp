@@ -46,24 +46,23 @@ export default function Home({ initialPosts, serverError }) {
       return;
     }
 
-    // Optimistic UI Update
-    setPosts(posts.map(p => {
-      if (p.id === postId) {
-        return {
-          ...p,
-          like_count: p.like_count + 1,
-          user_clap_count: (p.user_clap_count || 0) + 1,
-        };
-      }
-      return p;
-    }));
-
     const { error } = await supabase.rpc('add_clap', { post_id_input: postId });
 
     if (error) {
       console.error('Error clapping for post:', error);
       alert('Error: ' + error.message);
-      fetchPosts(); // Revert on error
+    } else {
+      // If successful, update the local state to reflect the new clap
+      setPosts(posts.map(p => {
+        if (p.id === postId) {
+          return {
+            ...p,
+            like_count: p.like_count + 1,
+            user_clap_count: (p.user_clap_count || 0) + 1,
+          };
+        }
+        return p;
+      }));
     }
   };
 
