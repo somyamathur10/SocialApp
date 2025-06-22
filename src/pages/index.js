@@ -5,7 +5,7 @@ import Navbar from '../components/navbar';
 import Link from 'next/link';
 import Head from 'next/head';
 import Avatar from '../components/Avatar';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@supabase/auth-helpers-react';
 
 // Helper component to render post images
 function PostImage({ imageUrl }) {
@@ -29,9 +29,8 @@ function PostImage({ imageUrl }) {
 
 export default function Home({ initialPosts, serverError }) {
   const [posts, setPosts] = useState(initialPosts || []);
-  const [user, setUser] = useState(null);
+  const user = useUser();
   const router = useRouter();
-  const { data: session } = useSession();
 
   useEffect(() => {
     if (serverError) {
@@ -39,24 +38,6 @@ export default function Home({ initialPosts, serverError }) {
       alert("Could not load posts. Please try again later.");
     }
   }, [serverError]);
-
-  useEffect(() => {
-    // This effect's job is to get the current user
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    // Initial user fetch
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
 
   const handleClap = async (postId) => {
     if (!user) {

@@ -100,4 +100,4 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 -- Grant execute permissions on functions
 GRANT EXECUTE ON FUNCTION public.add_clap(uuid) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.delete_post(uuid) TO authenticated; 
+GRANT EXECUTE ON FUNCTION public.delete_post(uuid) TO authenticated;

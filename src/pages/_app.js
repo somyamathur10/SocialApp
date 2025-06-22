@@ -1,11 +1,16 @@
+import { useState } from 'react';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase } from '../lib/supabaseClient';
 import '../styles/globals.css';
-import { ThemeProvider } from 'next-themes';
 
 function MyApp({ Component, pageProps }) {
   return (
-    <ThemeProvider attribute="class">
+    <SessionContextProvider
+      supabaseClient={supabase}
+      initialSession={pageProps.initialSession}
+    >
       <Component {...pageProps} />
-    </ThemeProvider>
+    </SessionContextProvider>
   );
 }
 
